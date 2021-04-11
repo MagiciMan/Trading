@@ -1,0 +1,62 @@
+//@version=4
+strategy(title="Chikou Crossover 2D", shorttitle="Chikou 2D", overlay=true , initial_capital=10000, default_qty_type=strategy.percent_of_equity, default_qty_value=50)
+
+displacement = input(26, minval=1, title="Displacement")
+
+// ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
+// ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
+// Function to securely and simply call `security()` so that it never repaints and never looks ahead.
+f_secureSecurity(_symbol, _res, _src) => security(_symbol, _res, _src[1], lookahead = barmerge.lookahead_on)
+
+// #10
+// sec10 = f_secureSecurity(syminfo.tickerid, "D", close)
+
+
+plot(close, offset = -displacement + 1, color=#459915, title="Lagging Span")
+
+// dailyclose=f_secureSecurity(syminfo.tickerid, "D", close)
+// dailyclose25=f_secureSecurity(syminfo.tickerid, "D", close[25])
+
+// fourHclose=f_secureSecurity(syminfo.tickerid, "240", close)
+// fourHclose25=f_secureSecurity(syminfo.tickerid, "240", close[25])
+
+// if (dailyclose > dailyclose25)
+//     if (crossover(fourHclose, fourHclose25))
+//         strategy.entry("ChikouLE", strategy.long, comment="ChikouLE")
+//     if (crossunder(fourHclose, fourHclose25))
+//         strategy.entry("ChikouSE", strategy.short, comment="ChikouSE")
+// else
+//     if (dailyclose < dailyclose25)
+//         strategy.entry("ChikouSE", strategy.short, comment="ChikouSE")
+
+
+//second option is to make suyre you run this on 4H and then just get 4H data from the system rather than security
+
+dailyclose=f_secureSecurity(syminfo.tickerid, "D", close)
+dailyclose25=f_secureSecurity(syminfo.tickerid, "D", close[25])
+dailycrossover = f_secureSecurity(syminfo.tickerid, "D", crossover(close, close[25]))
+dailycrossunder = f_secureSecurity(syminfo.tickerid, "D", crossunder(close, close[25]))
+
+bgcolor(color=crossover(dailyclose, dailyclose25) ? color.lime : na,
+     transp=50)
+bgcolor(color=crossunder(dailyclose, dailyclose25) ? color.red : na,
+     transp=50)
+//current time frame keep it at 4H though  
+bgcolor(color=crossover(close, close[25]) ? color.aqua : na,
+     transp=90)
+bgcolor(color=crossunder(close, close[25]) ? color.fuchsia : na,
+     transp=90)
+     
+//buy when day chikou crossover happens
+if(dailycrossover)
+    strategy.entry("Buy-D", strategy.long, comment="Buy-D")
+else
+    if (dailyclose > dailyclose25)
+        if (crossover(close, close[25]))
+            strategy.entry("Buy-4H", strategy.long, comment="Buy-4H")
+        if (crossunder(close, close[25]))
+            strategy.entry("Sell-4H", strategy.short, comment="Sell-4H")
+    else
+        if(dailycrossunder)
+        // if (dailyclose < dailyclose25)
+            strategy.entry("Sell-D", strategy.short, comment="Sell-D")
