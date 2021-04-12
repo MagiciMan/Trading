@@ -16,28 +16,14 @@ f_secureSecurity(_symbol, _res, _src) => security(_symbol, _res, _src[1], lookah
 
 plot(close, offset = -displacement + 1, color=#459915, title="Lagging Span")
 
-// dailyclose=f_secureSecurity(syminfo.tickerid, "D", close)
-// dailyclose25=f_secureSecurity(syminfo.tickerid, "D", close[25])
-
-// fourHclose=f_secureSecurity(syminfo.tickerid, "240", close)
-// fourHclose25=f_secureSecurity(syminfo.tickerid, "240", close[25])
-
-// if (dailyclose > dailyclose25)
-//     if (crossover(fourHclose, fourHclose25))
-//         strategy.entry("ChikouLE", strategy.long, comment="ChikouLE")
-//     if (crossunder(fourHclose, fourHclose25))
-//         strategy.entry("ChikouSE", strategy.short, comment="ChikouSE")
-// else
-//     if (dailyclose < dailyclose25)
-//         strategy.entry("ChikouSE", strategy.short, comment="ChikouSE")
-
-
-//second option is to make suyre you run this on 4H and then just get 4H data from the system rather than security
+//second option is to make sure you run this on lower resolution and then just get current res data from the system rather than security
 
 dailyclose=f_secureSecurity(syminfo.tickerid, res, close)
 dailyclose25=f_secureSecurity(syminfo.tickerid, res, close[25])
 dailycrossover = f_secureSecurity(syminfo.tickerid, res, crossover(close, close[25]))
 dailycrossunder = f_secureSecurity(syminfo.tickerid, res, crossunder(close, close[25]))
+
+//Background Color for trriger candles, the buy sell will happend in the begining of the the next candle
 
 bgcolor(color=crossover(dailyclose, dailyclose25) ? color.lime : na,
      transp=50)
@@ -49,7 +35,7 @@ bgcolor(color=crossover(close, close[25]) ? color.aqua : na,
 bgcolor(color=crossunder(close, close[25]) ? color.fuchsia : na,
      transp=90)
      
-//buy when day chikou crossover happens
+//buy when daily / higher resolution chikou crossover happens
 if(dailycrossover)
     strategy.entry("Buy-HigherRes", strategy.long, comment="Buy-HigherRes")
 else
