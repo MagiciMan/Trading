@@ -2,6 +2,8 @@
 strategy(title="Chikou Crossover 2D", shorttitle="Chikou 2D", overlay=true , initial_capital=10000, default_qty_type=strategy.percent_of_equity, default_qty_value=50)
 
 displacement = input(26, minval=1, title="Displacement")
+res = input(title="Top Layer Resolution", type=input.resolution, defval="1D")
+
 
 // ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
 // ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
@@ -32,10 +34,10 @@ plot(close, offset = -displacement + 1, color=#459915, title="Lagging Span")
 
 //second option is to make suyre you run this on 4H and then just get 4H data from the system rather than security
 
-dailyclose=f_secureSecurity(syminfo.tickerid, "D", close)
-dailyclose25=f_secureSecurity(syminfo.tickerid, "D", close[25])
-dailycrossover = f_secureSecurity(syminfo.tickerid, "D", crossover(close, close[25]))
-dailycrossunder = f_secureSecurity(syminfo.tickerid, "D", crossunder(close, close[25]))
+dailyclose=f_secureSecurity(syminfo.tickerid, res, close)
+dailyclose25=f_secureSecurity(syminfo.tickerid, res, close[25])
+dailycrossover = f_secureSecurity(syminfo.tickerid, res, crossover(close, close[25]))
+dailycrossunder = f_secureSecurity(syminfo.tickerid, res, crossunder(close, close[25]))
 
 bgcolor(color=crossover(dailyclose, dailyclose25) ? color.lime : na,
      transp=50)
@@ -49,14 +51,16 @@ bgcolor(color=crossunder(close, close[25]) ? color.fuchsia : na,
      
 //buy when day chikou crossover happens
 if(dailycrossover)
-    strategy.entry("Buy-D", strategy.long, comment="Buy-D")
+    strategy.entry("Buy-HigherRes", strategy.long, comment="Buy-HigherRes")
 else
     if (dailyclose > dailyclose25)
         if (crossover(close, close[25]))
-            strategy.entry("Buy-4H", strategy.long, comment="Buy-4H")
+            strategy.entry("Buy-CurrentRes", strategy.long, comment="Buy-CurrentRes")
         if (crossunder(close, close[25]))
-            strategy.entry("Sell-4H", strategy.short, comment="Sell-4H")
+            strategy.entry("Sell-CurrentRes", strategy.short, comment="Sell-CurrentRes")
     else
         if(dailycrossunder)
         // if (dailyclose < dailyclose25)
-            strategy.entry("Sell-D", strategy.short, comment="Sell-D")
+            strategy.entry("Sell-HigherRes", strategy.short, comment="Sell-HigherRes")
+
+        
